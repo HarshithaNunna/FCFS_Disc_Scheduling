@@ -1,0 +1,30 @@
+body {
+    margin: 0;
+}
+
+#graphContainer{
+    position: relative;
+    border: 1px solid #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #f0f0f0;
+    overflow: hidden;
+}
+
+canvas {
+    display: block;
+    margin: 0 auto;
+    background: #fff;
+}
+
+.y-axis-label{
+    right: 100%;
+    position: absolute;
+    top: 0;
+    transform: translateY(-50%);
+    font-size: 20px;
+    text-align: center;
+    width: 100%;
+}
