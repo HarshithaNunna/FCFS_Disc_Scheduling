@@ -1,134 +1,126 @@
-document.addEventListener("DOMContentLoaded", function() {
+function gg() {
+    FCFS();
+}
 
-  var canvas = document.getElementById("graphCanvas")
-  var context = canvas.getContext("2d")
-
-
-  context.lineWidth = 1
-
-
-  var canvasWidth = canvas.width
-  var canvasHeight = canvas.height
-  var yAxisWidth = 10
-
-  context.beginPath()
-  context.moveTo(yAxisWidth, 0)
-  context.lineTo(yAxisWidth, canvasHeight)
-  context.stroke() 
-  
-  var numLines = 10
-  var lineSpacing = (canvasWidth - yAxisWidth) / numLines
-
-  for (var i = 0; i <= numLines; i++) {
-    var x = i * lineSpacing + yAxisWidth
-    context.beginPath()
-    context.moveTo(x, 0)
-    context.lineTo(x, canvasHeight)
-    context.stroke() // Draw each vertical line
-
- 
-    context.fillText(i * 10, x - 10, 20)
-  }
-
-  
-  var startPoint = { x: 60, y: 60 }
-  var endPoint = { x: 107, y: 115 }
-
-  
-  var animationDuration = 5
-
- 
-  var interval = animationDuration / (Math.abs(endPoint.x - startPoint.x) + Math.abs(endPoint.y - startPoint.y))
-
-  
-  var currentPoint = { x: startPoint.x, y: startPoint.y }
-
-  
-  function updatePosition() {
-   
-    currentPoint.x += (endPoint.x - startPoint.x) / animationDuration * interval
-    currentPoint.y += (endPoint.y - startPoint.y) / animationDuration * interval
-
-  
-    context.clearRect(0, 0, yAxisWidth, canvasHeight)
-    context.clearRect(currentPoint.x, 0, canvasWidth - currentPoint.x, canvasHeight)
-
-    
-    context.beginPath()
-    context.moveTo(yAxisWidth, 0)
-    context.lineTo(yAxisWidth, canvasHeight)
-    context.stroke()
-
-    for (var i = 0; i <= numLines; i++) {
-      var x = i * lineSpacing + yAxisWidth
-      context.beginPath()
-      context.moveTo(x, 0)
-      context.lineTo(x, canvasHeight)
-      context.stroke()
-      context.fillText(i * 10, x - 10, 20)
+function validation(event) {
+    let value = event.target.value;
+    if (!/^(\d+,?(,\d+,?)*)?$/.test(value)) {
+        alert("invalid input entered. Please enter integer positive numbers separated by comma(,) ");
     }
+}
 
-   
-    context.beginPath()
-    context.moveTo(startPoint.x, startPoint.y)
-    context.lineTo(currentPoint.x, currentPoint.y)
-    context.stroke()
+async function FCFS() {
+    document.getElementById("vv").innerHTML = ""; // Clear previous input seek time
 
- 
-    var arrowheadSize = 1
-    var dx = endPoint.x - currentPoint.x
-    var dy = endPoint.y - currentPoint.y
-    var angle = Math.atan2(dy, dx)
-    context.save()
-    context.translate(currentPoint.x, currentPoint.y)
-    context.rotate(angle)
-    context.beginPath()
-    context.moveTo(0, 0)
-    context.lineTo(-arrowheadSize, -arrowheadSize / 2)
-    context.lineTo(-arrowheadSize, arrowheadSize / 2)
-    context.closePath()
-    context.fill()
-    context.beginPath()
-    context.arc(0, 0, 2.5, 0, 2 * Math.PI) // Draw a circle with radius 5 at the end of the line
-    context.fillStyle = 'red'
-    context.fill()
-    context.restore()
+    var seek_count = 0;
+    var distance, cur_track;
+    var x_values = document.getElementById("array").value.split(",").map(Number);
+    var head = document.getElementById("inputhead").value;
+    let size = x_values.length;
 
-   
-    if (currentPoint.x >= endPoint.x && currentPoint.y >= endPoint.y) {
-      if (endPoint.x === 107 && endPoint.y === 115) {
-      
-        startPoint = { x: endPoint.x, y: endPoint.y }
-        endPoint = { x: 206, y: 150 }
-        animationDuration = 5
-        interval = animationDuration / (Math.abs(endPoint.x - startPoint.x) + Math.abs(endPoint.y - startPoint.y))
-      } else if (endPoint.x === 206 && endPoint.y === 150) {
+   // Display initial seek time
+    var initial_track = x_values[0];
+    distance = Math.abs(initial_track - head);
+    seek_count += distance;
+    head = initial_track;
+
+    for (var i = 1; i < size; i++) {
+        cur_track = x_values[i];
+
+        distance = Math.abs(cur_track - head);
+        seek_count += distance;
+
         
-        startPoint = { x: endPoint.x, y: endPoint.y }
-        endPoint = { x: 305, y: 230 }
-        animationDuration = 5
-        interval = animationDuration / (Math.abs(endPoint.x - startPoint.x) + Math.abs(endPoint.y - startPoint.y))
-      } else if (endPoint.x === 305 && endPoint.y === 230) {
-       
-        startPoint = { x: endPoint.x, y: endPoint.y }
-        endPoint = { x: 450, y: 280 }
-        animationDuration = 5
-        interval = animationDuration / (Math.abs(endPoint.x - startPoint.x) + Math.abs(endPoint.y - startPoint.y))
-      } else {
-     
-        return
-      }
-
-    
-      currentPoint = { x: startPoint.x, y: startPoint.y }
+        head = cur_track;
     }
 
- 
-    requestAnimationFrame(updatePosition)
-  }
+    document.getElementById("vv").innerHTML += "Total number of " + "seek operations = " + seek_count;
+
+    await CHART();
+}
 
 
-  requestAnimationFrame(updatePosition)
-})
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function CHART() {
+    var arr = document.getElementById("array").value.split(",").map(Number);
+    var head = document.getElementById("inputhead").value;
+    var xArray = [head];
+    var yArray = arr.map((elem, i) => -i);
+    yArray.push(-arr.length);
+
+    var annotations = []; // Array to store annotations
+
+    // Populate xArray with array elements
+    for (var i = 0; i < arr.length; i++) {
+        xArray.push(arr[i]);
+    }
+
+    var data = [];
+
+    // Add points
+    data.push({
+        x: xArray,
+        y: yArray,
+        mode: "markers",
+        name: "Points",
+        line: { color: 'rgb(20,120,228)' }
+    });
+
+    var layout = {
+        yaxis: { range: [-10, 0] },
+        xaxis: { range: [0, 200] },
+        title: "FCFS GRAPH",
+    };
+
+    Plotly.newPlot("myPlot", data, layout).then(async function () {
+        for (var i = 0; i < xArray.length - 1; i++) {
+            var seekTime = Math.abs(xArray[i + 1] - xArray[i]);
+            var lineData = {
+                x: [xArray[i], xArray[i + 1]],
+                y: [yArray[i], yArray[i + 1]],
+                mode: "lines",
+                line: { color: 'rgb(111,168,229)' },
+                showlegend: false
+            };
+            annotations.push({
+                x: (xArray[i] + xArray[i + 1]) / 2, // Position the annotation in the middle of the movement
+                y: (yArray[i] + yArray[i + 1]) / 2, // Position the annotation in the middle of the movement
+                text: "ST: " + seekTime, // Display seek time
+                showarrow: false,
+                font: {
+                    color: 'black',
+                    size: 12
+                }
+            });
+            Plotly.addTraces("myPlot", lineData);
+            await delay(1000);
+        }
+
+        // Calculate initial seek time
+        var initial_track = arr[0];
+        var initial_seek_time = Math.abs(initial_track - head);
+
+        annotations.push({
+            x: initial_track, // Initial track position
+            y: yArray[0] - 0.5, // Y-coordinate of the first point
+            text: "ST: " + initial_seek_time, // Display initial seek time
+            showarrow: false,
+            font: {
+                color: 'black',
+                size: 12
+            }
+        });
+
+        var updatedLayout = {
+            ...layout,
+            annotations: annotations // Add annotations to layout
+        };
+
+        Plotly.relayout("myPlot", updatedLayout);
+    });
+}
 
   
